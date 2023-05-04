@@ -1,0 +1,57 @@
+name: Testing and Linter
+
+on:
+  push:
+    branches:
+      - release-**
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+jobs:
+  build:
+    name: "Test and Lint"
+    runs-on: ubuntu-latest
+    env:
+      NIGHTLY: nightly-2022-11-02 # Fix version to prevent cache misses with nightly changes
+    steps:
+      - name: Rust Setup
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          target: wasm32-unknown-unknown
+          override: true
+          components: rustfmt, clippy
+
+      - name: Install Nightly
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: ${{ env.NIGHTLY }}
+          target: wasm32-unknown-unknown
+
+      - name: Install protoc
+        run: |
+          sudo apt-get install -y protobuf-compiler
+          protoc --version
+
+      - uses: actions/checkout@v3
+
+      - name: Rustfmt
+        uses: actions-rs/cargo@v1
+        with:
+          toolchain: stable
+          command: fmt
+          args: --all --check
+      
+      - name: Check Build
+        run: |
+          SKIP_WASM_BUILD=1 cargo check --release
+
+      - name: Run tests
+        run: cargo test --locked --verbose --all
+      
+      - name: Ensure benchmarking compiles
+        run: >
+          pushd node &&
+          cargo check --release --features=runtime-benchmarks
