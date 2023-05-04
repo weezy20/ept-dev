@@ -186,7 +186,7 @@ async fn start_node_impl(
 			block_announce_validator_builder: Some(Box::new(|_| {
 				Box::new(block_announce_validator)
 			})),
-			warp_sync: None,
+			warp_sync_params: None,
 		})?;
 
 	if parachain_config.offchain_worker.enabled {
@@ -245,6 +245,10 @@ async fn start_node_impl(
 		Arc::new(move |hash, data| network.announce_block(hash, data))
 	};
 
+	let overseer_handle = relay_chain_interface
+        .overseer_handle()
+        .map_err(|e| sc_service::Error::Application(Box::new(e)))?;
+
 	let relay_chain_slot_duration = Duration::from_secs(6);
 
 	if validator {
@@ -275,6 +279,7 @@ async fn start_node_impl(
 			import_queue: import_queue_service,
 			collator_key: collator_key.expect("Command line arguments do not allow this. qed"),
 			relay_chain_slot_duration,
+			recovery_handle: Box::new(overseer_handle),
 		};
 
 		start_collator(params).await?;
@@ -287,6 +292,7 @@ async fn start_node_impl(
 			relay_chain_interface,
 			relay_chain_slot_duration,
 			import_queue: import_queue_service,
+			recovery_handle: Box::new(overseer_handle),
 		};
 
 		start_full_node(params)?;
