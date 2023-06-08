@@ -1,4 +1,6 @@
-# Extended Substrate Cumulus Parachain Template
+# Frontier Cumulus Parachain Template 
+
+Development moved to [FPT](https://github.com/paritytech/frontier-parachain-template/)
 
 A new [Cumulus](https://github.com/paritytech/cumulus/)-based Substrate node, ready for hacking ☁️..
 
