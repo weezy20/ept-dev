@@ -1,0 +1,64 @@
+[relaychain]
+chain = "rococo-local"
+default_command = "../bin/polkadot"
+
+  [[relaychain.nodes]]
+  name = "alice"
+  validator = true
+
+  [[relaychain.nodes]]
+  name = "bob"
+  validator = true
+
+  [[relaychain.nodes]]
+  name = "charlie"
+  validator = true
+
+  [[relaychain.nodes]]
+  name = "dave"
+  validator = true
+
+[[parachains]]
+id = 2000
+addToGenesis = true
+cumulus_based = true
+
+  [parachains.collator]
+  name = "collator2000"
+  command = "./target/release/parachain-template-node"
+  ws_port = 9922
+
+[[parachains]]
+id = 4000
+addToGenesis = true
+cumulus_based = true
+
+  [parachains.collator]
+  name = "collator4000"
+  command = "./target/release/parachain-template-node"
+  ws_port = 9944
+
+[[parachains]]
+id = 1000
+add_to_genesis = true
+cumulus_based = true
+chain = "asset-hub-rococo-local"
+
+  [[parachains.collators]]
+  name = "statemine"
+  command = "../bin/polkadot-parachain"
+  ws_port = 9911
+  args = ["--log=xcm=trace,pallet-assets=trace"]
+
+
+[[hrmp_channels]]
+sender = 1000
+recipient = 2000
+max_capacity = 8
+max_message_size = 512
+
+[[hrmp_channels]]
+sender = 2000
+recipient = 1000
+max_capacity = 8
+max_message_size = 512
